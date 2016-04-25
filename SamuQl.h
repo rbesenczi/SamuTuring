@@ -1154,9 +1154,10 @@ public:
 
     }
 
-    std::string printSortedRules() {
-
+std::string printSortedRules() {
+        /*
         std::vector<std::pair<std::pair<int, int>, int>> tmp;
+
 
         for ( auto& rule : rules ) {
             std::pair<std::pair<int, int>, int> p {{rule.first.first, rule.first.second}, rule.second};
@@ -1164,21 +1165,67 @@ public:
         }
 
         std::sort (
-            std::begin ( tmp ), std::end ( tmp ),
-        [=] ( auto&& t1, auto&&t2 ) {
+                    std::begin ( tmp ), std::end ( tmp ),
+                    [=] ( auto&& t1, auto&& t2 ) {
             return t1.second > t2.second;
         }
         );
+
+        //Pair,pair sort with functor
+
+        struct Greater
+        {
+            bool operator()( const std::pair<std::pair<int, int>, int>& lx,
+                             const std::pair<std::pair<int, int>, int>& rx )
+                    const { return lx.second > rx.second; }
+        };
+
+        std::sort( tmp.begin(), tmp.end(), Greater() );
+
+        for ( auto& rule : tmp ) {
+                ss << ", " <<rule.first.first <<","  << rule.first.second << "(" << rule.second<< ") ";
+                //ss << ", " <<rule.first.first <<", "  << rule.first.second;
+
+            }
+    */
+
+        //std::tuple version
+        std::vector<std::tuple<int,int,int>> tmp;
+
+        for ( auto& rule : rules ) {
+            auto p = std::make_tuple(rule.first.first, rule.first.second, rule.second);
+            //std::tuple<int,int,int> p {rule.first.first, rule.first.second, rule.second};
+            tmp.push_back ( p );
+        }
+
+        //Sort with labmda expression
+        /*
+        std::sort (
+                    std::begin ( tmp ), std::end ( tmp ),
+                    [=] ( auto&& t1, auto&& t2 ) {
+            return std::get<2>(t1) > std::get<2>(t2);
+        }
+        );
+        */
+
+        //Sort with functor
+        struct Greater
+        {
+            bool operator()( const std::tuple<int,int,int>& lx,
+                             const std::tuple<int,int,int>& rx )
+                    const { return std::get<2>(lx) > std::get<2>(rx); }
+        };
+
+        std::sort( tmp.begin(), tmp.end(), Greater() );
 
         std::stringstream ss;
 
         ss << tmp.size();
 
         for ( auto& rule : tmp ) {
-            //ss << ", " <<rule.first.first <<","  << rule.first.second << "(" << rule.second<< ") ";
-ss << ", " <<rule.first.first <<", "  << rule.first.second;
-	  
-	}
+            ss << ", " << std::get<0>(rule) <<","  << std::get<1>(rule) << "(" << std::get<2>(rule) << ") ";
+        }
+
         return ss.str();
 
     }
